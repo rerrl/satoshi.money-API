@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
+import { PaginationCoinsDto } from './dto/coins.dto';
 
 const COINGECKO_API_URL = process.env.COINGECKO_API_URL;
 const prisma = new PrismaClient();
@@ -71,5 +72,27 @@ export class AppService implements OnModuleInit {
       console.log('Done updating coins.');
       await prisma.$disconnect();
     }
+  }
+
+  async getCoins(query: PaginationCoinsDto): Promise<any> {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const order = query.order || 'desc';
+    const orderBy = query.orderBy || 'market_cap';
+
+    console.log({ page, limit, order, orderBy });
+
+    const coins = await prisma.coins.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [orderBy]: order,
+      },
+    });
+
+    return {
+      coins,
+      total: coins.length,
+    };
   }
 }
