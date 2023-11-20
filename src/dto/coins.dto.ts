@@ -3,7 +3,7 @@ import { IsOptional, IsPositive } from 'class-validator';
 export class PaginationCoinsDto {
   @IsOptional()
   @IsPositive()
-  page?: number;
+  offset?: number;
 
   @IsOptional()
   @IsPositive()

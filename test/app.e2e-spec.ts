@@ -38,7 +38,7 @@ describe('AppController (e2e)', () => {
       const resp = await request(app.getHttpServer())
         .get('/coins')
         .query({
-          page: 2,
+          offset: 2,
           limit: 5,
         })
         .expect(200);

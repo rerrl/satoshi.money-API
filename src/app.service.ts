@@ -75,15 +75,15 @@ export class AppService implements OnModuleInit {
   }
 
   async getCoins(query: PaginationCoinsDto): Promise<any> {
-    const page = Number(query.page) || 1;
+    const offset = Number(query.offset) || 1;
     const limit = Number(query.limit) || 10;
     const order = query.order || 'desc';
     const orderBy = query.orderBy || 'market_cap';
 
-    console.log({ page, limit, order, orderBy });
+    console.log({ offset, limit, order, orderBy });
 
     const coins = await prisma.coins.findMany({
-      skip: (page - 1) * limit,
+      skip: (offset - 1) * limit,
       take: limit,
       orderBy: {
         [orderBy]: order,
