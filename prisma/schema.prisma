@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model coins {
+  id            Int      @id @default(autoincrement())
+  cg_id         String   @unique
+  symbol        String
+  name          String
+  current_price Float
+  market_cap    Float
+  mc_rank       Int
+  high_24h      Float
+  low_24h       Float
+  ath           Float
+  volume_24h    Float
+  last_updated  DateTime
+}
