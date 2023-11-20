@@ -68,5 +68,29 @@ describe('AppController (e2e)', () => {
       const prices = resp.body.coins.map((coin) => coin.current_price);
       expect(prices).toEqual(prices.sort((a, b) => a - b));
     });
+
+    it('Cached response should be faster', async () => {
+      const start = Date.now();
+      const resp = await request(app.getHttpServer()).get('/coins').expect(200);
+      const firstRequestTime = Date.now() - start;
+      expect(resp.body).toHaveProperty('coins');
+      expect(resp.body).toHaveProperty('total');
+      expect(resp.body.coins).toHaveLength(10);
+      expect(resp.body.total).toBe(10);
+
+      const start2 = Date.now();
+      const resp2 = await request(app.getHttpServer())
+        .get('/coins')
+        .expect(200);
+      const secondRequestTime = Date.now() - start2;
+      expect(resp2.body).toHaveProperty('coins');
+      expect(resp2.body).toHaveProperty('total');
+      expect(resp2.body.coins).toHaveLength(10);
+      expect(resp2.body.total).toBe(10);
+
+      // make sure the second request is faster
+      console.log({ firstRequestTime, secondRequestTime });
+      expect(secondRequestTime).toBeLessThan(firstRequestTime);
+    });
   });
 });

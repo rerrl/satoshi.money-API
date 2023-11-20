@@ -1,14 +1,18 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { PaginationCoinsDto } from './dto/coins.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 const COINGECKO_API_URL = process.env.COINGECKO_API_URL;
 const prisma = new PrismaClient();
 
 @Injectable()
 export class AppService implements OnModuleInit {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
   onModuleInit(): void {
     // if not testing with jest:
     if (process.env.NODE_ENV !== 'test') {
@@ -80,7 +84,12 @@ export class AppService implements OnModuleInit {
     const order = query.order || 'desc';
     const orderBy = query.orderBy || 'market_cap';
 
-    console.log({ offset, limit, order, orderBy });
+    const cacheKey = `coins-${offset}-${limit}-${order}-${orderBy}`;
+    const cached = await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
 
     const coins = await prisma.coins.findMany({
       skip: (offset - 1) * limit,
@@ -90,9 +99,10 @@ export class AppService implements OnModuleInit {
       },
     });
 
-    return {
-      coins,
-      total: coins.length,
-    };
+    const retVal = { coins, total: coins.length };
+
+    await this.cacheManager.set(cacheKey, retVal);
+
+    return retVal;
   }
 }
