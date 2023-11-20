@@ -10,6 +10,8 @@
 
 **To keep this simple for now, we are only concerned with updating the top 100 coins, sorted by market cap.**
 
+To see caching and the query with pagination in action, see the `test/app.e2e-spec.ts` file. Check out [test section](#tests) below.
+
 ## Usage
 
 install deps
